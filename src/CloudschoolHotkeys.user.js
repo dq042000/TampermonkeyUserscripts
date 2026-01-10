@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CloudSchool 好用的鍵盤快速鍵集合
-// @version      1.1.0
-// @description  按下 Alt+E 快速切換側邊欄
+// @version      1.2.0
+// @description  按下 Alt+E 快速切換側邊欄，按下 Alt+R 快速切換 Issue 側邊欄。
 // @namespace    https://gitlab.cloudschool.com.tw/tampermonkey/sidebar
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/CloudschoolHotkeys.user.js
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/CloudschoolHotkeys.user.js
@@ -12,10 +12,6 @@
 (function () {
     "use strict";
 
-    /**
-     * 僅在「專案頁」執行
-     * 避免作用在登入頁、群組首頁、個人設定
-     */
     function isProjectPage() {
         const path = location.pathname.split("/").filter(Boolean);
         return path.length >= 2;
@@ -25,81 +21,128 @@
         return;
     }
 
-    const layoutPageSelector =
+    /* =========================
+     * 左側 Sidebar（Alt + E）
+     * ========================= */
+    const leftLayoutSelector =
         "div.layout-page.hide-when-top-nav-responsive-open";
 
-    const asideSelector = 'aside[aria-label="Project navigation"]';
+    const leftAsideSelector = 'aside[aria-label="Project navigation"]';
 
-    const topNavSelector =
+    const leftTopNavSelector =
         "div.top-nav-responsive.layout-page.content-wrapper-margin";
 
-    function toggleSidebar() {
-        const layoutPage = document.querySelector(layoutPageSelector);
-        const aside = document.querySelector(asideSelector);
-        const topNav = document.querySelector(topNavSelector);
+    function toggleLeftSidebar() {
+        const layout = document.querySelector(leftLayoutSelector);
+        const aside = document.querySelector(leftAsideSelector);
+        const topNav = document.querySelector(leftTopNavSelector);
 
-        if (!layoutPage || !aside || !topNav) {
-            return;
-        }
+        if (!layout || !aside || !topNav) return;
 
-        const isCollapsed = layoutPage.classList.contains(
-            "page-with-icon-sidebar"
-        );
+        const collapsed = layout.classList.contains("page-with-icon-sidebar");
 
-        if (isCollapsed) {
-            // 放大（還原）
-            layoutPage.classList.remove("page-with-icon-sidebar");
-
+        if (collapsed) {
+            layout.classList.remove("page-with-icon-sidebar");
             aside.className = "nav-sidebar";
-
             topNav.className =
                 "top-nav-responsive layout-page content-wrapper-margin";
         } else {
-            // 縮小
-            layoutPage.classList.add("page-with-icon-sidebar");
-
+            layout.classList.add("page-with-icon-sidebar");
             aside.className =
                 "nav-sidebar sidebar-collapsed-desktop js-sidebar-collapsed";
-
             topNav.className =
                 "top-nav-responsive layout-page content-wrapper-margin page-with-icon-sidebar";
         }
     }
 
-    function bindToggleButton() {
-        const btn = document.querySelector(
-            "a.toggle-sidebar-button.js-toggle-sidebar.qa-toggle-sidebar.rspec-toggle-sidebar"
-        );
+    /* =========================
+     * 右側 Issue Sidebar（Alt + R）
+     * ========================= */
+    const rightLayoutSelector =
+        "div.layout-page.hide-when-top-nav-responsive-open";
 
-        if (!btn || btn.dataset.tmBound === "1") {
-            return false;
+    const rightAsideSelector = 'aside[aria-label="issue"]';
+
+    function toggleRightSidebar() {
+        const layout = document.querySelector(rightLayoutSelector);
+        const aside = document.querySelector(rightAsideSelector);
+
+        if (!layout || !aside) return;
+
+        const isExpanded = layout.classList.contains("right-sidebar-expanded");
+
+        const expandIcon = aside.querySelector("svg.js-sidebar-expand");
+        const collapseIcon = aside.querySelector("svg.js-sidebar-collapse");
+
+        if (isExpanded) {
+            // 收合
+            layout.classList.remove("right-sidebar-expanded");
+            layout.classList.add("right-sidebar-collapsed");
+
+            aside.className =
+                "right-sidebar js-right-sidebar js-issuable-sidebar right-sidebar-collapsed";
+
+            expandIcon && expandIcon.classList.remove("hidden");
+
+            collapseIcon && collapseIcon.classList.add("hidden");
+        } else {
+            // 展開
+            layout.classList.remove("right-sidebar-collapsed");
+            layout.classList.add("right-sidebar-expanded");
+
+            aside.className =
+                "right-sidebar js-right-sidebar js-issuable-sidebar right-sidebar-expanded";
+
+            expandIcon && expandIcon.classList.add("hidden");
+
+            collapseIcon && collapseIcon.classList.remove("hidden");
         }
-
-        btn.dataset.tmBound = "1";
-
-        btn.addEventListener("click", (e) => {
-            e.preventDefault();
-            toggleSidebar();
-        });
-
-        return true;
     }
 
-    // SPA：等待 GitLab 專案頁 DOM 出現
-    const observer = new MutationObserver(() => {
-        bindToggleButton();
-    });
+    /* =========================
+     * 綁定按鈕（SPA）
+     * ========================= */
+    function bindButtons() {
+        // 左側
+        const leftBtn = document.querySelector(
+            "a.toggle-sidebar-button.js-toggle-sidebar"
+        );
+        if (leftBtn && !leftBtn.dataset.tmBoundLeft) {
+            leftBtn.dataset.tmBoundLeft = "1";
+            leftBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                toggleLeftSidebar();
+            });
+        }
 
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-    });
+        // 右側（issue）
+        const rightBtn = document.querySelector(
+            'a[aria-label="Toggle sidebar"].js-sidebar-toggle'
+        );
+        if (rightBtn && !rightBtn.dataset.tmBoundRight) {
+            rightBtn.dataset.tmBoundRight = "1";
+            rightBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                toggleRightSidebar();
+            });
+        }
+    }
 
-    // Alt + E 快速鍵
+    const observer = new MutationObserver(bindButtons);
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    /* =========================
+     * 快速鍵
+     * ========================= */
     document.addEventListener("keydown", (e) => {
         if (e.altKey && e.key.toLowerCase() === "e") {
             e.preventDefault();
-            toggleSidebar();
+            toggleLeftSidebar();
+        }
+
+        if (e.altKey && e.key.toLowerCase() === "r") {
+            e.preventDefault();
+            toggleRightSidebar();
         }
     });
 })();
