@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name         CloudSchool 好用的鍵盤快速鍵集合
-// @version      1.2.0
+// @version      1.2.1
 // @description  按下 Alt+E 快速切換側邊欄，按下 Alt+R 快速切換 Issue 側邊欄。
 // @namespace    https://gitlab.cloudschool.com.tw/tampermonkey/sidebar
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/CloudschoolHotkeys.user.js
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/CloudschoolHotkeys.user.js
 // @match        https://gitlab.cloudschool.com.tw/*/*
 // @author       Mike Ci
+// @icon         https://www.cloudschool.tw/stern-web/img/favicon.ico
 // ==/UserScript==
 
 (function () {
