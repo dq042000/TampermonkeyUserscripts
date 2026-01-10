@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         CloudSchool 好用的鍵盤快速鍵集合
-// @version      1.2.1
+// @version      1.2.2
 // @description  按下 Alt+E 快速切換側邊欄，按下 Alt+R 快速切換 Issue 側邊欄。
 // @namespace    https://gitlab.cloudschool.com.tw/tampermonkey/sidebar
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/CloudschoolHotkeys.user.js
@@ -26,28 +26,32 @@
      * 左側 Sidebar（Alt + E）
      * ========================= */
     const leftLayoutSelector =
-        "div.layout-page.hide-when-top-nav-responsive-open";
+        "div.layout-page.hide-when-top-nav-responsive-open.page-with-contextual-sidebar";
 
-    const leftAsideSelector = 'aside[aria-label="Project navigation"]';
+    const leftAsideSelector = "aside";
 
     const leftTopNavSelector =
         "div.top-nav-responsive.layout-page.content-wrapper-margin";
 
     function toggleLeftSidebar() {
         const layout = document.querySelector(leftLayoutSelector);
-        const aside = document.querySelector(leftAsideSelector);
+        if (!layout) return;
+
+        const aside = layout.querySelector(leftAsideSelector);
         const topNav = document.querySelector(leftTopNavSelector);
 
-        if (!layout || !aside || !topNav) return;
+        if (!aside || !topNav) return;
 
         const collapsed = layout.classList.contains("page-with-icon-sidebar");
 
         if (collapsed) {
+            // 目前是縮小的，要展開
             layout.classList.remove("page-with-icon-sidebar");
             aside.className = "nav-sidebar";
             topNav.className =
                 "top-nav-responsive layout-page content-wrapper-margin";
         } else {
+            // 目前是展開的，要縮小
             layout.classList.add("page-with-icon-sidebar");
             aside.className =
                 "nav-sidebar sidebar-collapsed-desktop js-sidebar-collapsed";
@@ -106,7 +110,7 @@
     function bindButtons() {
         // 左側
         const leftBtn = document.querySelector(
-            "a.toggle-sidebar-button.js-toggle-sidebar"
+            "a.toggle-sidebar-button.js-toggle-sidebar.qa-toggle-sidebar.rspec-toggle-sidebar"
         );
         if (leftBtn && !leftBtn.dataset.tmBoundLeft) {
             leftBtn.dataset.tmBoundLeft = "1";
