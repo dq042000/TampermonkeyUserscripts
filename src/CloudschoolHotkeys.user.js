@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CloudSchool 好用的鍵盤快速鍵集合
-// @version      1.2.2
-// @description  按下 Alt+E 快速切換側邊欄，按下 Alt+R 快速切換 Issue 側邊欄。
+// @version      1.2.3
+// @description  按下 Ctrl+B 快速切換側邊欄，按下 Alt+R 快速切換 Issue 側邊欄。
 // @namespace    https://gitlab.cloudschool.com.tw/tampermonkey/sidebar
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/CloudschoolHotkeys.user.js
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/CloudschoolHotkeys.user.js
@@ -23,7 +23,7 @@
     }
 
     /* =========================
-     * 左側 Sidebar（Alt + E）
+     * 左側 Sidebar（Ctrl + B）
      * ========================= */
     const leftLayoutSelector =
         "div.layout-page.hide-when-top-nav-responsive-open.page-with-contextual-sidebar";
@@ -140,7 +140,7 @@
      * 快速鍵
      * ========================= */
     document.addEventListener("keydown", (e) => {
-        if (e.altKey && e.key.toLowerCase() === "e") {
+        if (e.ctrlKey && e.key.toLowerCase() === "b") {
             e.preventDefault();
             toggleLeftSidebar();
         }
