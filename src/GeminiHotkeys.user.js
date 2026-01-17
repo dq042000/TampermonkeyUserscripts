@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Google Gemini 好用的鍵盤快速鍵集合
-// @version      0.1.0
+// @version      0.1.1
 // @description  按下 Ctrl+B 快速切換側邊欄
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/GeminiHotkeys.user.js
-// @match        https://gemini.google.com/app/*
+// @match        https://gemini.google.com/*
 // @author       Mike Ci
 // @icon         https://www.google.com/s2/favicons?domain=gemini.google.com
 // ==/UserScript==
