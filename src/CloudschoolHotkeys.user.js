@@ -110,7 +110,7 @@
     function bindButtons() {
         // 左側
         const leftBtn = document.querySelector(
-            "a.toggle-sidebar-button.js-toggle-sidebar.qa-toggle-sidebar.rspec-toggle-sidebar"
+            "a.toggle-sidebar-button.js-toggle-sidebar.qa-toggle-sidebar.rspec-toggle-sidebar",
         );
         if (leftBtn && !leftBtn.dataset.tmBoundLeft) {
             leftBtn.dataset.tmBoundLeft = "1";
@@ -122,7 +122,7 @@
 
         // 右側（issue）
         const rightBtn = document.querySelector(
-            'a[aria-label="Toggle sidebar"].js-sidebar-toggle'
+            'a[aria-label="Toggle sidebar"].js-sidebar-toggle',
         );
         if (rightBtn && !rightBtn.dataset.tmBoundRight) {
             rightBtn.dataset.tmBoundRight = "1";
