@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Google Gemini 好用的鍵盤快速鍵集合
-// @version      1.0.2
+// @version      1.0.3
 // @description  按下 Ctrl+B 快速切換側邊欄、Ctrl+Delete 刪除當前對話
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/GeminiHotkeys.user.js
@@ -92,37 +92,45 @@
     }
 
     async function handleDeleteChat() {
-        // 尋找當前對話視窗內的操作選單按鈕（排除側邊欄）
+        // 尋找對話視窗右上角的操作選單按鈕
         const actionsButtonSelectors = [
-            // 優先尋找主要內容區域的操作按鈕
-            "chat-app main conversation-actions [data-test-id='actions-menu-button']",
-            "chat-app .main-panel conversation-actions button",
-            "chat-app .conversation-container conversation-actions button",
-            "chat-app response-container ~ conversation-actions button",
-            // 通用備選方案（確保不在側邊欄內）
-            "chat-app conversation-actions [data-test-id='actions-menu-button']",
+            // 對話視窗頂部工具列的操作按鈕
+            "chat-app .mat-drawer-content header conversation-actions button",
+            "chat-app .conversation-header conversation-actions button",
+            "chat-app .chat-header conversation-actions button",
+            // 定位不在側邊欄內的 conversation-actions
             "chat-app .mat-drawer-content conversation-actions button",
+            "chat-app main header conversation-actions button",
+            "chat-app .main-content conversation-actions button",
+            // 使用 aria-label 定位
+            "chat-app .mat-drawer-content button[aria-label*='More']",
+            "chat-app .mat-drawer-content button[aria-label*='選項']",
         ];
 
-        let clicked = false;
+        let actionButton = null;
         for (const selector of actionsButtonSelectors) {
-            const element = document.querySelector(selector);
-            // 確保找到的元素不在側邊欄內
-            if (
-                element &&
-                !element.closest("nav") &&
-                !element.closest(".side-nav")
-            ) {
-                element.click();
-                clicked = true;
-                break;
+            const elements = document.querySelectorAll(selector);
+            for (const element of elements) {
+                // 確保不在側邊欄內且在可視區域
+                if (
+                    !element.closest("mat-drawer") &&
+                    !element.closest("nav") &&
+                    !element.closest(".side-nav") &&
+                    !element.closest(".sidenav")
+                ) {
+                    actionButton = element;
+                    break;
+                }
             }
+            if (actionButton) break;
         }
 
-        if (!clicked) {
-            console.warn("找不到當前對話的操作選單按鈕");
+        if (!actionButton) {
+            console.warn("找不到對話視窗右上角的操作選單按鈕");
             return false;
         }
+
+        actionButton.click();
 
         // 等待並點擊刪除按鈕
         const deleteButtonSelectors = [
