@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Google Gemini 好用的鍵盤快速鍵集合
-// @version      1.0.1
-// @description  按下 Ctrl+B 快速切換側邊欄、Ctrl+Delete 刪除對話
+// @version      1.0.2
+// @description  按下 Ctrl+B 快速切換側邊欄、Ctrl+Delete 刪除當前對話
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/GeminiHotkeys.user.js
 // @match        https://gemini.google.com/*
@@ -92,26 +92,35 @@
     }
 
     async function handleDeleteChat() {
-        // 嘗試多種可能的選擇器來找到操作選單按鈕
+        // 尋找當前對話視窗內的操作選單按鈕（排除側邊欄）
         const actionsButtonSelectors = [
+            // 優先尋找主要內容區域的操作按鈕
+            "chat-app main conversation-actions [data-test-id='actions-menu-button']",
+            "chat-app .main-panel conversation-actions button",
+            "chat-app .conversation-container conversation-actions button",
+            "chat-app response-container ~ conversation-actions button",
+            // 通用備選方案（確保不在側邊欄內）
             "chat-app conversation-actions [data-test-id='actions-menu-button']",
-            "chat-app [data-test-id='conversation-actions-menu-button']",
-            "chat-app conversation-actions button",
-            "chat-app mat-icon-button[aria-label*='More']",
-            "chat-app button[aria-label*='選項']",
-            "chat-app .conversation-actions button",
+            "chat-app .mat-drawer-content conversation-actions button",
         ];
 
         let clicked = false;
         for (const selector of actionsButtonSelectors) {
-            if (clickIfExists(selector)) {
+            const element = document.querySelector(selector);
+            // 確保找到的元素不在側邊欄內
+            if (
+                element &&
+                !element.closest("nav") &&
+                !element.closest(".side-nav")
+            ) {
+                element.click();
                 clicked = true;
                 break;
             }
         }
 
         if (!clicked) {
-            console.warn("找不到對話操作選單按鈕");
+            console.warn("找不到當前對話的操作選單按鈕");
             return false;
         }
 
