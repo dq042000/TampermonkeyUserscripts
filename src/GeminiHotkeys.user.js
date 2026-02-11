@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Google Gemini 好用的鍵盤快速鍵集合
-// @version      1.0.0
-// @description  按下 Ctrl+B 快速切換側邊欄
+// @version      1.0.1
+// @description  按下 Ctrl+B 快速切換側邊欄、Ctrl+Delete 刪除對話
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/GeminiHotkeys.user.js
 // @match        https://gemini.google.com/*
@@ -92,23 +92,69 @@
     }
 
     async function handleDeleteChat() {
-        const actionsButtonSelector =
-            "chat-app conversation-actions [data-test-id='actions-menu-button']";
+        // 嘗試多種可能的選擇器來找到操作選單按鈕
+        const actionsButtonSelectors = [
+            "chat-app conversation-actions [data-test-id='actions-menu-button']",
+            "chat-app [data-test-id='conversation-actions-menu-button']",
+            "chat-app conversation-actions button",
+            "chat-app mat-icon-button[aria-label*='More']",
+            "chat-app button[aria-label*='選項']",
+            "chat-app .conversation-actions button",
+        ];
 
-        if (!clickIfExists(actionsButtonSelector)) return false;
+        let clicked = false;
+        for (const selector of actionsButtonSelectors) {
+            if (clickIfExists(selector)) {
+                clicked = true;
+                break;
+            }
+        }
 
-        const deleteButton = await waitForElement(
+        if (!clicked) {
+            console.warn("找不到對話操作選單按鈕");
+            return false;
+        }
+
+        // 等待並點擊刪除按鈕
+        const deleteButtonSelectors = [
             ".cdk-overlay-container [data-test-id='delete-button']",
-            { timeoutMs: 2000 },
-        );
-        if (!deleteButton) return false;
+            ".cdk-overlay-container [data-test-id='delete-chat-button']",
+            ".cdk-overlay-container button[aria-label*='Delete']",
+            ".cdk-overlay-container button[aria-label*='刪除']",
+            ".mat-mdc-menu-content button:has(mat-icon:contains('delete'))",
+        ];
+
+        let deleteButton = null;
+        for (const selector of deleteButtonSelectors) {
+            deleteButton = await waitForElement(selector, { timeoutMs: 2000 });
+            if (deleteButton) break;
+        }
+
+        if (!deleteButton) {
+            console.warn("找不到刪除按鈕");
+            return false;
+        }
         deleteButton.click();
 
-        const confirmButton = await waitForElement(
+        // 等待並點擊確認按鈕
+        const confirmButtonSelectors = [
             ".cdk-overlay-container [data-test-id='confirm-button']",
-            { timeoutMs: 2000 },
-        );
-        if (!confirmButton) return false;
+            ".cdk-overlay-container [data-test-id='delete-confirm-button']",
+            ".cdk-overlay-container button[aria-label*='Delete']",
+            ".cdk-overlay-container button[aria-label*='確認']",
+            ".cdk-overlay-container .mdc-dialog__actions button:last-child",
+        ];
+
+        let confirmButton = null;
+        for (const selector of confirmButtonSelectors) {
+            confirmButton = await waitForElement(selector, { timeoutMs: 2000 });
+            if (confirmButton) break;
+        }
+
+        if (!confirmButton) {
+            console.warn("找不到確認按鈕");
+            return false;
+        }
         confirmButton.click();
         return true;
     }
