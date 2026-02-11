@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Google Gemini 好用的鍵盤快速鍵集合
-// @version      1.0.3
+// @version      1.0.4
 // @description  按下 Ctrl+B 快速切換側邊欄、Ctrl+Delete 刪除當前對話
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/GeminiHotkeys.user.js
@@ -94,35 +94,45 @@
     async function handleDeleteChat() {
         // 尋找對話視窗右上角的操作選單按鈕
         const actionsButtonSelectors = [
-            // 對話視窗頂部工具列的操作按鈕
-            "chat-app .mat-drawer-content header conversation-actions button",
-            "chat-app .conversation-header conversation-actions button",
-            "chat-app .chat-header conversation-actions button",
-            // 定位不在側邊欄內的 conversation-actions
-            "chat-app .mat-drawer-content conversation-actions button",
-            "chat-app main header conversation-actions button",
-            "chat-app .main-content conversation-actions button",
-            // 使用 aria-label 定位
-            "chat-app .mat-drawer-content button[aria-label*='More']",
-            "chat-app .mat-drawer-content button[aria-label*='選項']",
+            // 最新的精確選擇器
+            'chat-app button[data-test-id="conversation-actions-menu-icon-button"]',
+            "chat-app conversation-actions-icon button",
+            'chat-app button[aria-label*="開啟對話動作選單"]',
+            'chat-app button[aria-label*="Open conversation actions menu"]',
+            // 備選方案
+            'chat-app .mat-drawer-content button[mat-icon-button][aria-label*="對話"]',
+            'chat-app .mat-drawer-content button mat-icon[fonticon="more_vert"]',
         ];
 
         let actionButton = null;
         for (const selector of actionsButtonSelectors) {
-            const elements = document.querySelectorAll(selector);
-            for (const element of elements) {
-                // 確保不在側邊欄內且在可視區域
-                if (
-                    !element.closest("mat-drawer") &&
-                    !element.closest("nav") &&
-                    !element.closest(".side-nav") &&
-                    !element.closest(".sidenav")
-                ) {
-                    actionButton = element;
-                    break;
+            // 使用特殊處理來找到 mat-icon 的父按鈕
+            if (selector.includes('mat-icon[fonticon="more_vert"]')) {
+                const icon = document.querySelector(selector);
+                if (icon) {
+                    actionButton = icon.closest("button");
+                    if (
+                        actionButton &&
+                        !actionButton.closest("mat-drawer, nav, .side-nav")
+                    ) {
+                        break;
+                    }
                 }
+            } else {
+                const elements = document.querySelectorAll(selector);
+                for (const element of elements) {
+                    // 確保不在側邊欄內
+                    if (
+                        !element.closest("mat-drawer") &&
+                        !element.closest("nav") &&
+                        !element.closest(".side-nav")
+                    ) {
+                        actionButton = element;
+                        break;
+                    }
+                }
+                if (actionButton) break;
             }
-            if (actionButton) break;
         }
 
         if (!actionButton) {
