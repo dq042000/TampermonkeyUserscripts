@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         GitLab Sidebar Hotkey
-// @version      1.1.0
+// @version      1.2.0
 // @description  按下 Ctrl+B 快速切換 GitLab 左側 sidebar
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/GitLabSidebarHotkey.user.js
 // @match        *://*/*
+// @run-at       document-start
 // @author       Mike Ci
 // @icon         https://www.google.com/s2/favicons?domain=gitlab.com
 // @grant        none
