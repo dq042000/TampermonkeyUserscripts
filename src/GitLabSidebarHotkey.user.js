@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GitLab Sidebar Hotkey
-// @version      1.2.0
+// @version      1.3.0
 // @description  按下 Ctrl+B 快速切換 GitLab 左側 sidebar
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/GitLabSidebarHotkey.user.js
@@ -94,6 +94,7 @@
   function findSidebarToggleElement(doc) {
     // Try known GitLab sidebar toggle selectors first (covers GitLab 16+ super sidebar and older versions)
     const knownSelectors = [
+      '[data-testid="super-sidebar-collapse-button"]', // gitlab.com (official)
       '[data-testid="super-sidebar-toggle"]',
       '[data-testid="nav-toggle"]',
       '[aria-controls="super-sidebar"]',
@@ -156,6 +157,10 @@
         return;
       }
 
+      // Claim the event early to prevent GitLab's own Ctrl+B handler from firing
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
       if (
         isEditableElement(event.target) ||
         isEditableElement(document.activeElement)
@@ -169,8 +174,6 @@
         return;
       }
 
-      event.preventDefault();
-      event.stopImmediatePropagation();
       toggleButton.click();
     },
     true
