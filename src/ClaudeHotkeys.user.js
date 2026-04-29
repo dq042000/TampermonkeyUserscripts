@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Claude.ai 快捷鍵
-// @version      1.0.0
-// @description  按下 Ctrl+B 切換左側選單、Alt+S 開啟設定頁面
+// @version      1.0.1
+// @description  按下 Ctrl+B 切換左側選單、Alt+, 開啟設定頁面
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/ClaudeHotkeys.user.js
 // @match        https://claude.ai/*
@@ -34,13 +34,13 @@
     );
   }
 
-  // Alt+S — open settings (fires from anywhere, including editor)
+  // Alt+, — open settings (fires from anywhere, including editor)
   function matchesSettingsHotkey(event) {
     const key = normalizeText(event.key);
     const code = normalizeText(event.code);
 
     return (
-      (key === "s" || code === "keys") &&
+      (key === "," || code === "comma") &&
       Boolean(event.altKey) &&
       !event.ctrlKey &&
       !event.shiftKey &&
