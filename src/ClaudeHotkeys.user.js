@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Claude.ai 快捷鍵
-// @version      1.0.3
-// @description  按下 Ctrl+B 切換左側選單、Alt+Q 開啟設定頁面
+// @version      1.0.4
+// @description  按下 Ctrl+B 切換左側選單
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/ClaudeHotkeys.user.js
 // @match        https://claude.ai/*
@@ -29,20 +29,6 @@
       (key === "b" || code === "keyb") &&
       Boolean(event.ctrlKey) &&
       !event.altKey &&
-      !event.shiftKey &&
-      !event.metaKey
-    );
-  }
-
-  // Alt+Q — open settings (fires from anywhere, including editor)
-  function matchesSettingsHotkey(event) {
-    const key = normalizeText(event.key);
-    const code = normalizeText(event.code);
-
-    return (
-      (key === "q" || code === "keyq") &&
-      Boolean(event.altKey) &&
-      !event.ctrlKey &&
       !event.shiftKey &&
       !event.metaKey
     );
@@ -156,28 +142,6 @@
     );
   }
 
-  function handleOpenSettings() {
-    const knownSelectors = [
-      'a[href="/settings"]',
-      'a[href*="/settings"]',
-      '[data-testid="settings"]',
-      '[data-testid*="settings"]',
-      'button[aria-label*="Settings"]',
-      'a[aria-label*="Settings"]'
-    ];
-
-    for (const selector of knownSelectors) {
-      const el = document.querySelector(selector);
-      if (el) {
-        el.click();
-        return;
-      }
-    }
-
-    // Fallback: direct SPA-friendly navigation
-    window.location.href = "https://claude.ai/settings";
-  }
-
   window.addEventListener(
     "keydown",
     (event) => {
@@ -192,13 +156,6 @@
         event.preventDefault();
         event.stopImmediatePropagation();
         handleToggleSidebar();
-        return;
-      }
-
-      if (matchesSettingsHotkey(event)) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        handleOpenSettings();
       }
     },
     true

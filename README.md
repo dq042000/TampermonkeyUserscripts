@@ -22,4 +22,4 @@ post_date: 2026-01-17
 | [Google Gemini 好用的鍵盤快速鍵集合](https://github.com/dq042000/TampermonkeyUserscripts/blob/main/src/GeminiHotkeys.user.js) | 按下 Ctrl+B 快速切換側邊欄，按下 Ctrl+Delete 直接刪除聊天室。 |
 | [GitHub Stars 回到最上層](https://github.com/dq042000/TampermonkeyUserscripts/blob/main/src/GithubStarsBackToTop.user.js) | 在 GitHub Stars 換頁後自動捲動到標題並顯示「回到最上層」按鈕，點擊可平滑回到頁面頂端。 |
 | [GitHub Copilot Sidebar Hotkey](https://github.com/dq042000/TampermonkeyUserscripts/blob/main/src/GithubCopilotSidebarHotkey.user.js) | 按下 Ctrl+B 快速切換 GitHub Copilot 左側對話列表面板。 |
-| [Claude.ai 快捷鍵](https://github.com/dq042000/TampermonkeyUserscripts/blob/main/src/ClaudeHotkeys.user.js) | 按下 Ctrl+B 切換左側選單、Alt+Q 開啟設定頁面。 |
+| [Claude.ai 快捷鍵](https://github.com/dq042000/TampermonkeyUserscripts/blob/main/src/ClaudeHotkeys.user.js) | 按下 Ctrl+B 切換左側選單。 |
