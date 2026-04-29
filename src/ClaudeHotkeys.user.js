@@ -178,7 +178,7 @@
     window.location.href = "https://claude.ai/settings";
   }
 
-  document.addEventListener(
+  window.addEventListener(
     "keydown",
     (event) => {
       if (matchesSidebarHotkey(event)) {
