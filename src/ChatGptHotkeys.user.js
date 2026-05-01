@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         ChatGPT 快捷鍵
-// @version      1.0.1
+// @version      1.0.2
 // @description  Ctrl+B 切換左側選單；Ctrl+Delete 刪除當前對話
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/ChatGptHotkeys.user.js
@@ -117,33 +117,41 @@
         value.includes("chat options") ||
         value.includes("more options") ||
         value.includes("conversation options") ||
-        value.includes("chat controls")
+        value.includes("chat controls") ||
+        value.includes("更多") ||
+        value.includes("選項") ||
+        value.includes("conversation-options")
     );
   }
 
   function findSidebarToggleElement() {
-    const knownSelectors = [
-      'button[aria-label="開啟側邊欄"]',
+    // Try close button first: if sidebar is open the close button is NOT inert.
+    // If sidebar is closed the close button is inside [inert] and gets skipped.
+    const closeSelectors = [
       'button[aria-label="關閉側邊欄"]',
       '[data-testid="close-sidebar-button"]',
+      'button[aria-label="Close sidebar"]'
+    ];
+    for (const selector of closeSelectors) {
+      const el = document.querySelector(selector);
+      if (el && !el.closest("[inert]")) return el;
+    }
+
+    // Then try open button (sidebar is currently closed).
+    const openSelectors = [
+      'button[aria-label="開啟側邊欄"]',
       '[data-testid="open-sidebar-button"]',
       '[data-testid*="sidebar-toggle"]',
-      'button[aria-label="Close sidebar"]',
       'button[aria-label="Open sidebar"]',
       'button[aria-label="Toggle sidebar"]',
-      '[aria-controls*="sidebar"]',
-      '[data-testid*="sidebar"]'
+      '[aria-controls*="sidebar"]'
     ];
-
-    for (const selector of knownSelectors) {
+    for (const selector of openSelectors) {
       const el = document.querySelector(selector);
-      if (el && !el.closest("[inert]")) {
-        return el;
-      }
+      if (el && !el.closest("[inert]")) return el;
     }
 
     const candidates = document.querySelectorAll("button, a, [role='button']");
-
     for (const candidate of candidates) {
       if (
         !candidate.closest("[inert]") &&
@@ -204,7 +212,8 @@
     );
 
     for (const item of menuItems) {
-      if (normalizeText(item.textContent) === "delete") {
+      const text = normalizeText(item.textContent);
+      if (text === "delete" || text === "刪除") {
         return item;
       }
     }
@@ -232,7 +241,7 @@
 
     for (const btn of dialogButtons) {
       const text = normalizeText(btn.textContent);
-      if (text === "delete" || text === "confirm") {
+      if (text === "delete" || text === "confirm" || text === "刪除" || text === "確認") {
         return btn;
       }
     }

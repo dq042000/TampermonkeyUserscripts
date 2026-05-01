@@ -165,6 +165,8 @@ test("isOptionsButtonTrigger matches options button labels", () => {
     { ariaLabel: "More options", expected: true },
     { ariaLabel: "Conversation options", expected: true },
     { ariaLabel: "Chat controls", expected: true },
+    { ariaLabel: "更多選項", expected: true },
+    { ariaLabel: "更多", expected: true },
     { ariaLabel: "Send message", expected: false },
     { ariaLabel: "New chat", expected: false }
   ];
@@ -183,33 +185,33 @@ test("isOptionsButtonTrigger matches options button labels", () => {
   }
 });
 
-test("findSidebarToggleElement uses known selector when available", () => {
-  const toggleEl = { tagName: "BUTTON", closest: () => null };
+test("findSidebarToggleElement returns close button when sidebar is open", () => {
+  const closeEl = { tagName: "BUTTON", closest: () => null };
 
   const doc = {
     querySelector(selector) {
-      return selector === 'button[aria-label="開啟側邊欄"]' ? toggleEl : null;
+      return selector === 'button[aria-label="關閉側邊欄"]' ? closeEl : null;
     },
     querySelectorAll: () => []
   };
 
-  assert.equal(findSidebarToggleElement(doc), toggleEl);
+  assert.equal(findSidebarToggleElement(doc), closeEl);
 });
 
-test("findSidebarToggleElement skips elements inside inert container", () => {
-  const inertEl = { tagName: "BUTTON", closest: (sel) => (sel === "[inert]" ? {} : null) };
-  const visibleEl = { tagName: "BUTTON", closest: () => null };
+test("findSidebarToggleElement returns open button when close button is inert (sidebar closed)", () => {
+  const inertCloseEl = { tagName: "BUTTON", closest: (sel) => (sel === "[inert]" ? {} : null) };
+  const openEl = { tagName: "BUTTON", closest: () => null };
 
   const doc = {
     querySelector(selector) {
-      if (selector === 'button[aria-label="開啟側邊欄"]') return inertEl;
-      if (selector === 'button[aria-label="關閉側邊欄"]') return visibleEl;
+      if (selector === 'button[aria-label="關閉側邊欄"]') return inertCloseEl;
+      if (selector === 'button[aria-label="開啟側邊欄"]') return openEl;
       return null;
     },
     querySelectorAll: () => []
   };
 
-  assert.equal(findSidebarToggleElement(doc), visibleEl);
+  assert.equal(findSidebarToggleElement(doc), openEl);
 });
 
 test("findSidebarToggleElement falls back to attribute scan", () => {
@@ -309,7 +311,7 @@ test("findDeleteMenuItem uses known selector when available", () => {
   assert.equal(findDeleteMenuItem(doc), menuItem);
 });
 
-test("findDeleteMenuItem falls back to textContent match", () => {
+test("findDeleteMenuItem falls back to textContent match (English)", () => {
   const deleteItem = {
     tagName: "LI",
     getAttribute: () => null,
@@ -326,6 +328,35 @@ test("findDeleteMenuItem falls back to textContent match", () => {
             tagName: "LI",
             getAttribute: () => null,
             textContent: "Rename",
+            dataset: {}
+          },
+          deleteItem
+        ];
+      }
+      return [];
+    }
+  };
+
+  assert.equal(findDeleteMenuItem(doc), deleteItem);
+});
+
+test("findDeleteMenuItem falls back to textContent match (Chinese)", () => {
+  const deleteItem = {
+    tagName: "LI",
+    getAttribute: () => null,
+    textContent: "刪除",
+    dataset: {}
+  };
+
+  const doc = {
+    querySelector: () => null,
+    querySelectorAll: (selector) => {
+      if (selector === '[role="menuitem"], [role="option"]') {
+        return [
+          {
+            tagName: "LI",
+            getAttribute: () => null,
+            textContent: "重新命名",
             dataset: {}
           },
           deleteItem
@@ -370,7 +401,7 @@ test("findDeleteConfirmButton uses known selector when available", () => {
   assert.equal(findDeleteConfirmButton(doc), confirmBtn);
 });
 
-test("findDeleteConfirmButton falls back to dialog button text match", () => {
+test("findDeleteConfirmButton falls back to dialog button text match (English)", () => {
   const deleteBtn = {
     tagName: "BUTTON",
     getAttribute: () => null,
@@ -390,6 +421,38 @@ test("findDeleteConfirmButton falls back to dialog button text match", () => {
             tagName: "BUTTON",
             getAttribute: () => null,
             textContent: "Cancel",
+            dataset: {}
+          },
+          deleteBtn
+        ];
+      }
+      return [];
+    }
+  };
+
+  assert.equal(findDeleteConfirmButton(doc), deleteBtn);
+});
+
+test("findDeleteConfirmButton falls back to dialog button text match (Chinese)", () => {
+  const deleteBtn = {
+    tagName: "BUTTON",
+    getAttribute: () => null,
+    textContent: "刪除",
+    dataset: {}
+  };
+
+  const doc = {
+    querySelector: () => null,
+    querySelectorAll: (selector) => {
+      if (
+        selector ===
+        'dialog button, [role="dialog"] button, [role="alertdialog"] button'
+      ) {
+        return [
+          {
+            tagName: "BUTTON",
+            getAttribute: () => null,
+            textContent: "取消",
             dataset: {}
           },
           deleteBtn

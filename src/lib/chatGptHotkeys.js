@@ -101,33 +101,41 @@ function isOptionsButtonTrigger(candidate) {
       value.includes("chat options") ||
       value.includes("more options") ||
       value.includes("conversation options") ||
-      value.includes("chat controls")
+      value.includes("chat controls") ||
+      value.includes("更多") ||
+      value.includes("選項") ||
+      value.includes("conversation-options")
   );
 }
 
 function findSidebarToggleElement(doc) {
-  const knownSelectors = [
-    'button[aria-label="開啟側邊欄"]',
+  // Try close button first: if sidebar is open the close button is NOT inert.
+  // If sidebar is closed the close button is inside [inert] and gets skipped.
+  const closeSelectors = [
     'button[aria-label="關閉側邊欄"]',
     '[data-testid="close-sidebar-button"]',
+    'button[aria-label="Close sidebar"]'
+  ];
+  for (const selector of closeSelectors) {
+    const el = doc.querySelector(selector);
+    if (el && !el.closest("[inert]")) return el;
+  }
+
+  // Then try open button (sidebar is currently closed).
+  const openSelectors = [
+    'button[aria-label="開啟側邊欄"]',
     '[data-testid="open-sidebar-button"]',
     '[data-testid*="sidebar-toggle"]',
-    'button[aria-label="Close sidebar"]',
     'button[aria-label="Open sidebar"]',
     'button[aria-label="Toggle sidebar"]',
-    '[aria-controls*="sidebar"]',
-    '[data-testid*="sidebar"]'
+    '[aria-controls*="sidebar"]'
   ];
-
-  for (const selector of knownSelectors) {
+  for (const selector of openSelectors) {
     const el = doc.querySelector(selector);
-    if (el && !el.closest("[inert]")) {
-      return el;
-    }
+    if (el && !el.closest("[inert]")) return el;
   }
 
   const candidates = doc.querySelectorAll("button, a, [role='button']");
-
   for (const candidate of candidates) {
     if (
       !candidate.closest("[inert]") &&
@@ -186,7 +194,8 @@ function findDeleteMenuItem(doc) {
   const menuItems = doc.querySelectorAll('[role="menuitem"], [role="option"]');
 
   for (const item of menuItems) {
-    if (normalizeText(item.textContent) === "delete") {
+    const text = normalizeText(item.textContent);
+    if (text === "delete" || text === "刪除") {
       return item;
     }
   }
@@ -214,7 +223,7 @@ function findDeleteConfirmButton(doc) {
 
   for (const btn of dialogButtons) {
     const text = normalizeText(btn.textContent);
-    if (text === "delete" || text === "confirm") {
+    if (text === "delete" || text === "confirm" || text === "刪除" || text === "確認") {
       return btn;
     }
   }
