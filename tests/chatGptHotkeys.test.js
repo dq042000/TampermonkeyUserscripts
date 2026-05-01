@@ -139,6 +139,8 @@ test("isSidebarToggleTrigger matches sidebar labels", () => {
     { ariaLabel: "Expand sidebar", expected: true },
     { ariaLabel: "Show sidebar", expected: true },
     { ariaLabel: "Hide sidebar", expected: true },
+    { ariaLabel: "開啟側邊欄", expected: true },
+    { ariaLabel: "關閉側邊欄", expected: true },
     { ariaLabel: "Submit", expected: false },
     { ariaLabel: "Open menu", expected: false }
   ];
@@ -182,13 +184,11 @@ test("isOptionsButtonTrigger matches options button labels", () => {
 });
 
 test("findSidebarToggleElement uses known selector when available", () => {
-  const toggleEl = { tagName: "BUTTON" };
+  const toggleEl = { tagName: "BUTTON", closest: () => null };
 
   const doc = {
     querySelector(selector) {
-      return selector === 'button[aria-label="Close sidebar"]'
-        ? toggleEl
-        : null;
+      return selector === 'button[aria-label="開啟側邊欄"]' ? toggleEl : null;
     },
     querySelectorAll: () => []
   };
@@ -196,12 +196,29 @@ test("findSidebarToggleElement uses known selector when available", () => {
   assert.equal(findSidebarToggleElement(doc), toggleEl);
 });
 
+test("findSidebarToggleElement skips elements inside inert container", () => {
+  const inertEl = { tagName: "BUTTON", closest: (sel) => (sel === "[inert]" ? {} : null) };
+  const visibleEl = { tagName: "BUTTON", closest: () => null };
+
+  const doc = {
+    querySelector(selector) {
+      if (selector === 'button[aria-label="開啟側邊欄"]') return inertEl;
+      if (selector === 'button[aria-label="關閉側邊欄"]') return visibleEl;
+      return null;
+    },
+    querySelectorAll: () => []
+  };
+
+  assert.equal(findSidebarToggleElement(doc), visibleEl);
+});
+
 test("findSidebarToggleElement falls back to attribute scan", () => {
   const matchingButton = {
     tagName: "BUTTON",
     getAttribute: (name) => (name === "aria-label" ? "Toggle sidebar" : ""),
     textContent: "",
-    dataset: {}
+    dataset: {},
+    closest: () => null
   };
 
   const doc = {
@@ -211,7 +228,8 @@ test("findSidebarToggleElement falls back to attribute scan", () => {
         tagName: "BUTTON",
         getAttribute: () => "Submit",
         textContent: "",
-        dataset: {}
+        dataset: {},
+        closest: () => null
       },
       matchingButton
     ]
@@ -228,7 +246,8 @@ test("findSidebarToggleElement returns null when no toggle found", () => {
         tagName: "BUTTON",
         getAttribute: () => "Submit",
         textContent: "",
-        dataset: {}
+        dataset: {},
+        closest: () => null
       }
     ]
   };

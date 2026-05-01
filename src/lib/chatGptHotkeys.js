@@ -84,7 +84,8 @@ function isSidebarToggleTrigger(candidate) {
       value.includes("collapse sidebar") ||
       value.includes("expand sidebar") ||
       value.includes("show sidebar") ||
-      value.includes("hide sidebar")
+      value.includes("hide sidebar") ||
+      value.includes("側邊欄")
   );
 }
 
@@ -106,6 +107,8 @@ function isOptionsButtonTrigger(candidate) {
 
 function findSidebarToggleElement(doc) {
   const knownSelectors = [
+    'button[aria-label="開啟側邊欄"]',
+    'button[aria-label="關閉側邊欄"]',
     '[data-testid="close-sidebar-button"]',
     '[data-testid="open-sidebar-button"]',
     '[data-testid*="sidebar-toggle"]',
@@ -118,7 +121,7 @@ function findSidebarToggleElement(doc) {
 
   for (const selector of knownSelectors) {
     const el = doc.querySelector(selector);
-    if (el) {
+    if (el && !el.closest("[inert]")) {
       return el;
     }
   }
@@ -126,7 +129,10 @@ function findSidebarToggleElement(doc) {
   const candidates = doc.querySelectorAll("button, a, [role='button']");
 
   for (const candidate of candidates) {
-    if (isSidebarToggleTrigger(getCandidateMetadata(candidate))) {
+    if (
+      !candidate.closest("[inert]") &&
+      isSidebarToggleTrigger(getCandidateMetadata(candidate))
+    ) {
       return candidate;
     }
   }

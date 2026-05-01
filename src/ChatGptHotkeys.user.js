@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         ChatGPT 快捷鍵
-// @version      1.0.0
+// @version      1.0.1
 // @description  Ctrl+B 切換左側選單；Ctrl+Delete 刪除當前對話
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/ChatGptHotkeys.user.js
@@ -100,7 +100,8 @@
         value.includes("collapse sidebar") ||
         value.includes("expand sidebar") ||
         value.includes("show sidebar") ||
-        value.includes("hide sidebar")
+        value.includes("hide sidebar") ||
+        value.includes("側邊欄")
     );
   }
 
@@ -122,6 +123,8 @@
 
   function findSidebarToggleElement() {
     const knownSelectors = [
+      'button[aria-label="開啟側邊欄"]',
+      'button[aria-label="關閉側邊欄"]',
       '[data-testid="close-sidebar-button"]',
       '[data-testid="open-sidebar-button"]',
       '[data-testid*="sidebar-toggle"]',
@@ -134,7 +137,7 @@
 
     for (const selector of knownSelectors) {
       const el = document.querySelector(selector);
-      if (el) {
+      if (el && !el.closest("[inert]")) {
         return el;
       }
     }
@@ -142,7 +145,10 @@
     const candidates = document.querySelectorAll("button, a, [role='button']");
 
     for (const candidate of candidates) {
-      if (isSidebarToggleTrigger(getCandidateMetadata(candidate))) {
+      if (
+        !candidate.closest("[inert]") &&
+        isSidebarToggleTrigger(getCandidateMetadata(candidate))
+      ) {
         return candidate;
       }
     }
