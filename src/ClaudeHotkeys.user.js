@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Claude.ai 快捷鍵
-// @version      1.0.4
-// @description  按下 Ctrl+B 切換左側選單
+// @version      1.0.5
+// @description  按下 Ctrl+B 切換左側選單；按下 Ctrl+Delete 刪除當前對話
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/ClaudeHotkeys.user.js
 // @match        https://claude.ai/*
@@ -122,6 +122,38 @@
     return null;
   }
 
+  // Ctrl+Delete — delete current conversation
+  function matchesDeleteChatHotkey(event) {
+    const key = normalizeText(event.key);
+    const code = normalizeText(event.code);
+
+    return (
+      (key === "delete" || code === "delete") &&
+      Boolean(event.ctrlKey) &&
+      !event.altKey &&
+      !event.shiftKey &&
+      !event.metaKey
+    );
+  }
+
+  function handleDeleteChat() {
+    const menuTrigger = document.querySelector(
+      '[data-testid="chat-menu-trigger"]'
+    );
+    if (!menuTrigger) return;
+
+    menuTrigger.click();
+
+    setTimeout(function () {
+      const deleteItem = document.querySelector(
+        '[data-testid="delete-chat-trigger"]'
+      );
+      if (!deleteItem) return;
+
+      deleteItem.click();
+    }, 150);
+  }
+
   function handleToggleSidebar() {
     const btn = findSidebarToggleElement();
 
@@ -156,6 +188,19 @@
         event.preventDefault();
         event.stopImmediatePropagation();
         handleToggleSidebar();
+      }
+
+      if (matchesDeleteChatHotkey(event)) {
+        if (
+          isEditableElement(event.target) ||
+          isEditableElement(document.activeElement)
+        ) {
+          return;
+        }
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        handleDeleteChat();
       }
     },
     true
