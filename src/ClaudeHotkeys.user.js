@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Claude.ai 快捷鍵
-// @version      1.0.7
+// @version      1.0.8
 // @description  按下 Ctrl+B 切換左側選單；按下 Ctrl+Delete 刪除當前對話
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/ClaudeHotkeys.user.js
@@ -159,7 +159,9 @@
     menuTrigger.click();
 
     waitAndClick('[data-testid="delete-chat-trigger"]', 1000, function () {
-      waitAndClick('[data-testid="delete-modal-confirm"]', 1000);
+      setTimeout(function () {
+        waitAndClick('[data-testid="delete-modal-confirm"]', 1000);
+      }, 300);
     });
   }
 
