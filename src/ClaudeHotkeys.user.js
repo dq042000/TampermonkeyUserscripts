@@ -136,8 +136,18 @@
     );
   }
 
-  function findDeleteConfirmButton() {
-    return document.querySelector('[data-testid="delete-modal-confirm"]');
+  function waitAndClick(selector, maxWait, onClicked) {
+    const start = Date.now();
+    const timer = setInterval(function () {
+      const el = document.querySelector(selector);
+      if (el) {
+        clearInterval(timer);
+        el.click();
+        if (onClicked) onClicked();
+      } else if (Date.now() - start > maxWait) {
+        clearInterval(timer);
+      }
+    }, 50);
   }
 
   function handleDeleteChat() {
@@ -148,21 +158,9 @@
 
     menuTrigger.click();
 
-    setTimeout(function () {
-      const deleteItem = document.querySelector(
-        '[data-testid="delete-chat-trigger"]'
-      );
-      if (!deleteItem) return;
-
-      deleteItem.click();
-
-      setTimeout(function () {
-        const confirmBtn = findDeleteConfirmButton();
-        if (confirmBtn) {
-          confirmBtn.click();
-        }
-      }, 300);
-    }, 150);
+    waitAndClick('[data-testid="delete-chat-trigger"]', 1000, function () {
+      waitAndClick('[data-testid="delete-modal-confirm"]', 1000);
+    });
   }
 
   function handleToggleSidebar() {
