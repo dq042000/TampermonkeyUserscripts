@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Google Gemini 好用的鍵盤快速鍵集合
-// @version      1.0.7
+// @version      1.0.8
 // @description  按下 Ctrl+B 快速切換側邊欄、Ctrl+Delete 刪除當前對話
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/GeminiHotkeys.user.js
@@ -65,6 +65,32 @@
                 }
 
                 setTimeout(tick, intervalMs);
+            }
+
+            tick();
+        });
+    }
+
+    function waitForMenuItemByText(texts, timeoutMs = 2000) {
+        return new Promise((resolve) => {
+            const start = Date.now();
+
+            function tick() {
+                const items = document.querySelectorAll('[role="menuitem"]');
+                for (const item of items) {
+                    const text = item.textContent.trim();
+                    if (texts.some((t) => text === t || text.includes(t))) {
+                        resolve(item);
+                        return;
+                    }
+                }
+
+                if (Date.now() - start >= timeoutMs) {
+                    resolve(null);
+                    return;
+                }
+
+                setTimeout(tick, 50);
             }
 
             tick();
@@ -137,40 +163,33 @@
 
         actionButton.click();
 
-        // 等待並點擊刪除按鈕
-        const deleteButtonSelectors = [
-            ".cdk-overlay-container [data-test-id='delete-button']",
-            ".cdk-overlay-container [data-test-id='delete-chat-button']",
-            ".cdk-overlay-container button[aria-label*='Delete']",
-            ".cdk-overlay-container button[aria-label*='刪除']",
-            ".cdk-overlay-container .mat-mdc-menu-content button",
-        ];
-
-        let deleteButton = null;
-        for (const selector of deleteButtonSelectors) {
-            deleteButton = await waitForElement(selector, { timeoutMs: 2000 });
-            if (deleteButton) break;
-        }
-
-        if (!deleteButton) {
+        // 等待並點擊刪除選單項目（GEM-MENU-ITEM 自訂元素，用文字判斷）
+        const deleteItem = await waitForMenuItemByText(["刪除", "Delete"]);
+        if (!deleteItem) {
             console.warn("找不到刪除按鈕");
             return false;
         }
-        deleteButton.click();
+        deleteItem.click();
 
-        // 等待並點擊確認按鈕
+        // 等待確認對話框並點擊確認按鈕
         const confirmButtonSelectors = [
-            ".cdk-overlay-container [data-test-id='confirm-button']",
-            ".cdk-overlay-container [data-test-id='delete-confirm-button']",
-            ".cdk-overlay-container button[aria-label*='Delete']",
-            ".cdk-overlay-container button[aria-label*='確認']",
-            ".cdk-overlay-container .mdc-dialog__actions button:last-child",
+            "button[data-test-id='confirm-button']",
+            "button[data-test-id='delete-confirm-button']",
+            "[role='dialog'] button[aria-label*='刪除']",
+            "[role='dialog'] button[aria-label*='Delete']",
+            "[role='alertdialog'] button:last-of-type",
+            ".mdc-dialog__actions button:last-child",
         ];
 
         let confirmButton = null;
         for (const selector of confirmButtonSelectors) {
             confirmButton = await waitForElement(selector, { timeoutMs: 2000 });
             if (confirmButton) break;
+        }
+
+        // 備選：找確認對話框內含「刪除」文字的按鈕
+        if (!confirmButton) {
+            confirmButton = await waitForMenuItemByText(["刪除", "Delete", "確認", "Confirm"], 2000);
         }
 
         if (!confirmButton) {
