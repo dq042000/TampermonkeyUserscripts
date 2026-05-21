@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Google Gemini 好用的鍵盤快速鍵集合
-// @version      1.0.4
+// @version      1.0.5
 // @description  按下 Ctrl+B 快速切換側邊欄、Ctrl+Delete 刪除當前對話
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/GeminiHotkeys.user.js
@@ -73,6 +73,7 @@
 
     function handleToggleChatApp() {
         const menuButtonSelector =
+            "chat-app [data-test-id='side-nav-sparkle-button']," +
             "chat-app [data-test-id='side-nav-menu-button'] button," +
             "chat-app [data-test-id='side-nav-menu-button']";
 
@@ -92,51 +93,45 @@
     }
 
     async function handleDeleteChat() {
-        // 尋找對話視窗右上角的操作選單按鈕
+        // 找到目前活躍的對話項目，觸發 hover 讓操作按鈕出現
+        const activeItem =
+            document.querySelector('[aria-current="page"]') ||
+            document.querySelector('.mdc-list-item--activated') ||
+            document.querySelector('mat-nav-list [aria-selected="true"]');
+
+        if (activeItem) {
+            activeItem.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true, cancelable: true, view: window }));
+            activeItem.dispatchEvent(new MouseEvent("mouseover", { bubbles: true, cancelable: true, view: window }));
+            await new Promise((r) => setTimeout(r, 150));
+        }
+
         const actionsButtonSelectors = [
-            // 最新的精確選擇器
-            'chat-app button[data-test-id="conversation-actions-menu-icon-button"]',
-            "chat-app conversation-actions-icon button",
-            'chat-app button[aria-label*="開啟對話動作選單"]',
-            'chat-app button[aria-label*="Open conversation actions menu"]',
-            // 備選方案
-            'chat-app .mat-drawer-content button[mat-icon-button][aria-label*="對話"]',
-            'chat-app .mat-drawer-content button mat-icon[fonticon="more_vert"]',
+            'button[aria-label*="開啟對話動作選單"]',
+            'button[aria-label*="Open conversation actions menu"]',
+            'button[data-test-id="conversation-actions-menu-icon-button"]',
+            "conversation-actions-icon button",
         ];
 
         let actionButton = null;
-        for (const selector of actionsButtonSelectors) {
-            // 使用特殊處理來找到 mat-icon 的父按鈕
-            if (selector.includes('mat-icon[fonticon="more_vert"]')) {
-                const icon = document.querySelector(selector);
-                if (icon) {
-                    actionButton = icon.closest("button");
-                    if (
-                        actionButton &&
-                        !actionButton.closest("mat-drawer, nav, .side-nav")
-                    ) {
-                        break;
-                    }
-                }
-            } else {
-                const elements = document.querySelectorAll(selector);
-                for (const element of elements) {
-                    // 確保不在側邊欄內
-                    if (
-                        !element.closest("mat-drawer") &&
-                        !element.closest("nav") &&
-                        !element.closest(".side-nav")
-                    ) {
-                        actionButton = element;
-                        break;
-                    }
-                }
+
+        // 優先在活躍對話項目內找（避免點到其他對話的按鈕）
+        if (activeItem) {
+            for (const sel of actionsButtonSelectors) {
+                actionButton = activeItem.querySelector(sel);
+                if (actionButton) break;
+            }
+        }
+
+        // 備選：全頁搜尋
+        if (!actionButton) {
+            for (const sel of actionsButtonSelectors) {
+                actionButton = await waitForElement(sel, { timeoutMs: 1000 });
                 if (actionButton) break;
             }
         }
 
         if (!actionButton) {
-            console.warn("找不到對話視窗右上角的操作選單按鈕");
+            console.warn("找不到對話動作選單按鈕");
             return false;
         }
 
