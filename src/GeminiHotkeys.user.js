@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Google Gemini 好用的鍵盤快速鍵集合
-// @version      1.0.6
+// @version      1.0.7
 // @description  按下 Ctrl+B 快速切換側邊欄、Ctrl+Delete 刪除當前對話
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/GeminiHotkeys.user.js
@@ -72,28 +72,23 @@
     }
 
     function handleToggleChatApp() {
-        // 新版 Gemini 拆成獨立的開啟/關閉按鈕，優先嘗試關閉（側邊欄展開時才可見）
-        if (clickIfExists('chat-app button[aria-label*="關閉側欄"], chat-app button[aria-label*="Close sidebar"]')) return true;
+        // 新版 Gemini 拆成獨立的開啟/關閉按鈕，只點擊「可見」的按鈕避免誤觸
+        const allButtons = [...document.querySelectorAll("chat-app button")];
+        const visibleSidebarBtn = allButtons.find((btn) => {
+            if (btn.offsetParent === null) return false;
+            const label = btn.getAttribute("aria-label") || "";
+            return label.includes("側欄") || label.includes("sidebar");
+        });
 
-        const menuButtonSelector =
-            "chat-app [data-test-id='side-nav-sparkle-button']," +
-            "chat-app button[aria-label*='開啟側欄']," +
-            "chat-app button[aria-label*='Open sidebar']," +
-            "chat-app [data-test-id='side-nav-menu-button'] button," +
-            "chat-app [data-test-id='side-nav-menu-button']";
-
-        if (clickIfExists(menuButtonSelector)) return true;
+        if (visibleSidebarBtn) {
+            visibleSidebarBtn.click();
+            return true;
+        }
 
         const root = document.querySelector("chat-app#app-root");
         if (!root) return false;
 
-        root.dispatchEvent(
-            new MouseEvent("click", {
-                bubbles: true,
-                cancelable: true,
-                view: window,
-            }),
-        );
+        root.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
         return true;
     }
 
@@ -105,8 +100,8 @@
             document.querySelector('mat-nav-list [aria-selected="true"]');
 
         if (activeItem) {
-            activeItem.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true, cancelable: true, view: window }));
-            activeItem.dispatchEvent(new MouseEvent("mouseover", { bubbles: true, cancelable: true, view: window }));
+            activeItem.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true, cancelable: true }));
+            activeItem.dispatchEvent(new MouseEvent("mouseover", { bubbles: true, cancelable: true }));
             await new Promise((r) => setTimeout(r, 150));
         }
 
