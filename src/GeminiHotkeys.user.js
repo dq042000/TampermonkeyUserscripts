@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Google Gemini 好用的鍵盤快速鍵集合
-// @version      1.0.5
+// @version      1.0.6
 // @description  按下 Ctrl+B 快速切換側邊欄、Ctrl+Delete 刪除當前對話
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/GeminiHotkeys.user.js
@@ -72,8 +72,13 @@
     }
 
     function handleToggleChatApp() {
+        // 新版 Gemini 拆成獨立的開啟/關閉按鈕，優先嘗試關閉（側邊欄展開時才可見）
+        if (clickIfExists('chat-app button[aria-label*="關閉側欄"], chat-app button[aria-label*="Close sidebar"]')) return true;
+
         const menuButtonSelector =
             "chat-app [data-test-id='side-nav-sparkle-button']," +
+            "chat-app button[aria-label*='開啟側欄']," +
+            "chat-app button[aria-label*='Open sidebar']," +
             "chat-app [data-test-id='side-nav-menu-button'] button," +
             "chat-app [data-test-id='side-nav-menu-button']";
 
@@ -143,7 +148,7 @@
             ".cdk-overlay-container [data-test-id='delete-chat-button']",
             ".cdk-overlay-container button[aria-label*='Delete']",
             ".cdk-overlay-container button[aria-label*='刪除']",
-            ".mat-mdc-menu-content button:has(mat-icon:contains('delete'))",
+            ".cdk-overlay-container .mat-mdc-menu-content button",
         ];
 
         let deleteButton = null;
