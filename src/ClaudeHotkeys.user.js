@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Claude.ai 快捷鍵
-// @version      1.0.8
+// @version      1.0.9
 // @description  按下 Ctrl+B 切換左側選單；按下 Ctrl+Delete 刪除當前對話
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/ClaudeHotkeys.user.js
@@ -150,17 +150,55 @@
     }, 50);
   }
 
-  function handleDeleteChat() {
-    const menuTrigger = document.querySelector(
-      '[data-testid="chat-menu-trigger"]'
+  // Claude.ai 的確認刪除按鈕沒有 data-testid，只能靠按鈕文字比對
+  function waitAndClickButtonByText(
+    containerSelector,
+    text,
+    maxWait,
+    onClicked
+  ) {
+    const start = Date.now();
+    const target = normalizeText(text);
+    const timer = setInterval(function () {
+      const container = document.querySelector(containerSelector);
+      if (container) {
+        const btn = Array.from(container.querySelectorAll("button")).find(
+          (b) => normalizeText(b.textContent) === target
+        );
+        if (btn) {
+          clearInterval(timer);
+          btn.click();
+          if (onClicked) onClicked();
+          return;
+        }
+      }
+      if (Date.now() - start > maxWait) {
+        clearInterval(timer);
+      }
+    }, 50);
+  }
+
+  // 目前 Claude.ai 的對話選單按鈕沒有 data-testid，只有 aria-label="More options for ..."
+  function findChatMenuTrigger() {
+    return (
+      document.querySelector('[data-testid="chat-menu-trigger"]') ||
+      document.querySelector('button[aria-label^="More options"]')
     );
+  }
+
+  function handleDeleteChat() {
+    const menuTrigger = findChatMenuTrigger();
     if (!menuTrigger) return;
 
     menuTrigger.click();
 
     waitAndClick('[data-testid="delete-chat-trigger"]', 1000, function () {
       setTimeout(function () {
-        waitAndClick('[data-testid="delete-modal-confirm"]', 1000);
+        waitAndClickButtonByText(
+          '[role="alertdialog"], [role="dialog"]',
+          "Delete",
+          1000
+        );
       }, 300);
     });
   }
