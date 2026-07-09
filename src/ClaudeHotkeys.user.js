@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Claude.ai 快捷鍵
-// @version      1.1.3
-// @description  按下 Ctrl+B 切換左側選單；按下 Ctrl+Delete 刪除當前對話（含自動確認）；按下 Ctrl+Shift+U 開啟 Settings > Usage
+// @version      1.1.4
+// @description  按下 Ctrl+B 切換左側選單；按下 Ctrl+Delete 刪除當前對話（含自動確認）；按下 Ctrl+Alt+U 開啟 Settings > Usage
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/ClaudeHotkeys.user.js
 // @match        https://claude.ai/*
@@ -137,7 +137,7 @@
     );
   }
 
-  // Ctrl+Shift+U — open Settings > Usage
+  // Ctrl+Alt+U — open Settings > Usage
   function matchesUsageHotkey(event) {
     const key = normalizeText(event.key);
     const code = normalizeText(event.code);
@@ -145,8 +145,8 @@
     return (
       (key === "u" || code === "keyu") &&
       Boolean(event.ctrlKey) &&
-      Boolean(event.shiftKey) &&
-      !event.altKey &&
+      Boolean(event.altKey) &&
+      !event.shiftKey &&
       !event.metaKey
     );
   }
@@ -360,7 +360,7 @@
         handleDeleteChat();
       }
 
-      // Ctrl+Shift+U 不是文字編輯常用的組合鍵，允許在輸入框內也能觸發
+      // Ctrl+Alt+U 不是文字編輯常用的組合鍵，允許在輸入框內也能觸發
       if (matchesUsageHotkey(event)) {
         event.preventDefault();
         event.stopImmediatePropagation();
