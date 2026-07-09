@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Claude.ai 快捷鍵
-// @version      1.1.2
+// @version      1.1.3
 // @description  按下 Ctrl+B 切換左側選單；按下 Ctrl+Delete 刪除當前對話（含自動確認）；按下 Ctrl+Shift+U 開啟 Settings > Usage
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/ClaudeHotkeys.user.js
@@ -360,14 +360,8 @@
         handleDeleteChat();
       }
 
+      // Ctrl+Shift+U 不是文字編輯常用的組合鍵，允許在輸入框內也能觸發
       if (matchesUsageHotkey(event)) {
-        if (
-          isEditableElement(event.target) ||
-          isEditableElement(document.activeElement)
-        ) {
-          return;
-        }
-
         event.preventDefault();
         event.stopImmediatePropagation();
         handleOpenUsage();
