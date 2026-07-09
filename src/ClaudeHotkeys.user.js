@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Claude.ai 快捷鍵
-// @version      1.1.0
+// @version      1.1.1
 // @description  按下 Ctrl+B 切換左側選單；按下 Ctrl+Delete 刪除當前對話（含自動確認）；按下 Ctrl+Shift+U 開啟 Settings > Usage
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/ClaudeHotkeys.user.js
@@ -257,7 +257,7 @@
     const match = location.pathname.match(/\/chat\/([^/?#]+)/);
     if (match) {
       const currentId = match[1];
-      const link = document.querySelector(`a[href="/chat/${currentId}"]`);
+      const link = document.querySelector(`[href="/chat/${currentId}"]`);
       const row = link && link.closest("div.relative.group, li");
       const scopedBtn =
         row && row.querySelector('button[aria-label^="More options"]');
