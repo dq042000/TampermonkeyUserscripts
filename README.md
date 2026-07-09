@@ -8,7 +8,7 @@ categories: [general]
 tags: [tampermonkey, userscripts]
 ai_note: yes
 summary: TampermonkeyUserscripts 腳本清單與快速鍵說明。
-post_date: 2026-01-17
+post_date: 2026-07-09
 ---
 
 ## TampermonkeyUserscripts
@@ -19,8 +19,8 @@ post_date: 2026-01-17
 |------|------|
 | [CloudSchool 好用的鍵盤快速鍵集合](https://github.com/dq042000/TampermonkeyUserscripts/blob/main/src/CloudschoolHotkeys.user.js) | 按下 Alt+R 快速切換 Issue 側邊欄。 |
 | [GitLab Sidebar Hotkey](https://github.com/dq042000/TampermonkeyUserscripts/blob/main/src/GitLabSidebarHotkey.user.js) | 按下 Ctrl+B 快速切換 GitLab 左側 sidebar。 |
-| [Google Gemini 好用的鍵盤快速鍵集合](https://github.com/dq042000/TampermonkeyUserscripts/blob/main/src/GeminiHotkeys.user.js) | 按下 Ctrl+B 快速切換側邊欄，按下 Ctrl+Delete 直接刪除聊天室。 |
+| [Google Gemini 好用的鍵盤快速鍵集合](https://github.com/dq042000/TampermonkeyUserscripts/blob/main/src/GeminiHotkeys.user.js) | 按下 Ctrl+B 快速切換側邊欄，按下 Ctrl+Delete 刪除當前對話。 |
 | [GitHub Stars 回到最上層](https://github.com/dq042000/TampermonkeyUserscripts/blob/main/src/GithubStarsBackToTop.user.js) | 在 GitHub Stars 換頁後自動捲動到標題並顯示「回到最上層」按鈕，點擊可平滑回到頁面頂端。 |
 | [GitHub Copilot Sidebar Hotkey](https://github.com/dq042000/TampermonkeyUserscripts/blob/main/src/GithubCopilotSidebarHotkey.user.js) | 按下 Ctrl+B 快速切換 GitHub Copilot 左側對話列表面板。 |
-| [Claude.ai 快捷鍵](https://github.com/dq042000/TampermonkeyUserscripts/blob/main/src/ClaudeHotkeys.user.js) | 按下 Ctrl+B 切換左側選單。 |
+| [Claude.ai 快捷鍵](https://github.com/dq042000/TampermonkeyUserscripts/blob/main/src/ClaudeHotkeys.user.js) | 按下 Ctrl+B 切換左側選單；按下 Ctrl+Delete 刪除當前對話（含自動確認）；按下 Ctrl+Alt+U 開啟 Settings > Usage。 |
 | [ChatGPT 快捷鍵](https://github.com/dq042000/TampermonkeyUserscripts/blob/main/src/ChatGptHotkeys.user.js) | 按下 Ctrl+B 切換左側選單；按下 Ctrl+Delete 自動刪除當前對話。 |
