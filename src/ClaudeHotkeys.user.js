@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Claude.ai 快捷鍵
-// @version      1.1.1
+// @version      1.1.2
 // @description  按下 Ctrl+B 切換左側選單；按下 Ctrl+Delete 刪除當前對話（含自動確認）；按下 Ctrl+Shift+U 開啟 Settings > Usage
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/ClaudeHotkeys.user.js
@@ -16,6 +16,7 @@
 
   function normalizeText(value) {
     return String(value || "")
+      .replace(/[\uE000-\uF8FF]/g, "") // 過濾圖示字型使用的私有區塊字元（Private Use Area）
       .trim()
       .toLowerCase();
   }
