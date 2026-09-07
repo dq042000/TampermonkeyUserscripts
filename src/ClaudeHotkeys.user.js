@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Claude.ai 快捷鍵
-// @version      1.1.4
+// @version      1.1.5
 // @description  按下 Ctrl+B 切換左側選單；按下 Ctrl+Delete 刪除當前對話（含自動確認）；按下 Ctrl+Alt+U 開啟 Settings > Usage
 // @namespace    https://github.com/dq042000/TampermonkeyUserscripts
 // @source       https://github.com/dq042000/TampermonkeyUserscripts/raw/main/src/ClaudeHotkeys.user.js
@@ -93,21 +93,40 @@
     };
   }
 
+  // 只有 button / a / role="button" 才是真正可點的開關。
+  // claude.ai 現在有一個 div[data-testid="sidebar"] 容器，
+  // 用 [data-testid*="sidebar"] 這種寬鬆選擇器會先命中它，點了沒有作用
+  function isClickableControl(element) {
+    if (!element) {
+      return false;
+    }
+
+    const tagName = normalizeText(element.tagName);
+    if (tagName === "button" || tagName === "a") {
+      return true;
+    }
+
+    return (
+      typeof element.getAttribute === "function" &&
+      normalizeText(element.getAttribute("role")) === "button"
+    );
+  }
+
   function findSidebarToggleElement() {
     const knownSelectors = [
+      '[aria-label="Hide sidebar"]',
+      '[aria-label="Show sidebar"]',
       '[data-testid="sidebar-toggle"]',
       '[aria-label="Close sidebar"]',
       '[aria-label="Open sidebar"]',
       '[aria-label="Toggle sidebar"]',
       '[aria-label="Collapse sidebar"]',
-      '[aria-label="Expand sidebar"]',
-      '[aria-controls*="sidebar"]',
-      '[data-testid*="sidebar"]'
+      '[aria-label="Expand sidebar"]'
     ];
 
     for (const selector of knownSelectors) {
       const el = document.querySelector(selector);
-      if (el) {
+      if (isClickableControl(el)) {
         return el;
       }
     }
@@ -265,8 +284,9 @@
       if (scopedBtn) return scopedBtn;
     }
 
-    // 備援：抓側邊欄第一個 More options 按鈕
-    return document.querySelector('button[aria-label^="More options"]');
+    // 不做「抓側邊欄第一個 More options」的備援：改版後第一個
+    // More options 是釘選區的項目，按下去會操作到別的對話
+    return null;
   }
 
   function handleDeleteChat() {
@@ -282,24 +302,16 @@
     });
   }
 
+  // 回傳是否真的按到開關。找不到時回傳 false，讓事件放行給
+  // claude.ai 自己的 Ctrl+B 接手，而不是攔下來造成完全沒反應
   function handleToggleSidebar() {
     const btn = findSidebarToggleElement();
-
-    if (btn) {
-      btn.click();
-      return;
+    if (!btn) {
+      return false;
     }
 
-    // Fallback: simulate the original Ctrl+. shortcut the app natively handles
-    document.dispatchEvent(
-      new KeyboardEvent("keydown", {
-        key: ".",
-        code: "Period",
-        ctrlKey: true,
-        bubbles: true,
-        cancelable: true
-      })
-    );
+    btn.click();
+    return true;
   }
 
   // Settings 對話框裡的「Usage」分頁按鈕沒有 data-testid，只能靠按鈕文字比對
@@ -342,9 +354,10 @@
           return;
         }
 
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        handleToggleSidebar();
+        if (handleToggleSidebar()) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }
       }
 
       if (matchesDeleteChatHotkey(event)) {

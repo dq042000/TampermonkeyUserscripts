@@ -4,6 +4,7 @@ const assert = require("node:assert/strict");
 const {
   findSidebarToggleElement,
   findSettingsElement,
+  isClickableControl,
   isEditableElement,
   isSidebarToggleTrigger,
   matchesSidebarHotkey,
@@ -182,6 +183,49 @@ test("findSidebarToggleElement returns null when no toggle found", () => {
   };
 
   assert.equal(findSidebarToggleElement(doc), null);
+});
+
+test("isClickableControl only accepts real controls", () => {
+  assert.equal(isClickableControl({ tagName: "BUTTON" }), true);
+  assert.equal(isClickableControl({ tagName: "A" }), true);
+  assert.equal(
+    isClickableControl({ tagName: "DIV", getAttribute: () => "button" }),
+    true
+  );
+  assert.equal(
+    isClickableControl({ tagName: "DIV", getAttribute: () => null }),
+    false
+  );
+  assert.equal(isClickableControl(null), false);
+});
+
+test("findSidebarToggleElement skips the sidebar container div", () => {
+  // 迴歸測試：claude.ai 改版後出現 div[data-testid="sidebar"] 容器，
+  // 舊的 [data-testid*="sidebar"] 會先命中它並讓 Ctrl+B 失效
+  const container = {
+    tagName: "DIV",
+    dataset: { testid: "sidebar" },
+    getAttribute: () => null,
+    textContent: ""
+  };
+  const toggleButton = {
+    tagName: "BUTTON",
+    getAttribute: (name) => (name === "aria-label" ? "Hide sidebar" : null),
+    textContent: "",
+    dataset: {}
+  };
+
+  const doc = {
+    querySelector(selector) {
+      if (selector === '[aria-label="Hide sidebar"]') {
+        return toggleButton;
+      }
+      return selector.includes("sidebar") ? container : null;
+    },
+    querySelectorAll: () => []
+  };
+
+  assert.equal(findSidebarToggleElement(doc), toggleButton);
 });
 
 test("findSettingsElement returns settings link when present", () => {

@@ -88,21 +88,40 @@ function getCandidateMetadata(element) {
   };
 }
 
+// 只有 button / a / role="button" 才是真正可點的開關。
+// claude.ai 現在有一個 div[data-testid="sidebar"] 容器，
+// 用 [data-testid*="sidebar"] 這種寬鬆選擇器會先命中它，點了沒有作用
+function isClickableControl(element) {
+  if (!element) {
+    return false;
+  }
+
+  const tagName = normalizeText(element.tagName);
+  if (tagName === "button" || tagName === "a") {
+    return true;
+  }
+
+  return (
+    typeof element.getAttribute === "function" &&
+    normalizeText(element.getAttribute("role")) === "button"
+  );
+}
+
 function findSidebarToggleElement(doc) {
   const knownSelectors = [
+    '[aria-label="Hide sidebar"]',
+    '[aria-label="Show sidebar"]',
     '[data-testid="sidebar-toggle"]',
     '[aria-label="Close sidebar"]',
     '[aria-label="Open sidebar"]',
     '[aria-label="Toggle sidebar"]',
     '[aria-label="Collapse sidebar"]',
-    '[aria-label="Expand sidebar"]',
-    '[aria-controls*="sidebar"]',
-    '[data-testid*="sidebar"]'
+    '[aria-label="Expand sidebar"]'
   ];
 
   for (const selector of knownSelectors) {
     const el = doc.querySelector(selector);
-    if (el) {
+    if (isClickableControl(el)) {
       return el;
     }
   }
@@ -142,6 +161,7 @@ module.exports = {
   findSidebarToggleElement,
   findSettingsElement,
   getCandidateMetadata,
+  isClickableControl,
   isEditableElement,
   isSidebarToggleTrigger,
   matchesSidebarHotkey,
